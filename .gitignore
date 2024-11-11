@@ -1,0 +1,7 @@
+#忽略文件夹
+build/
+managed_components/
+
+#忽略python编译文件
+*.pyc
+
