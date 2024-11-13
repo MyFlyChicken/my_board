@@ -5,3 +5,6 @@ managed_components/
 #忽略python编译文件
 *.pyc
 
+#忽略esp32 lock文件
+*.lock
+
