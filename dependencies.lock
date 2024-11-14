@@ -53,7 +53,7 @@ dependencies:
   espressif/esp_lvgl_port:
     dependencies: []
     source:
-      path: /home/yf/project/my_board/components/espressif__esp_lvgl_port
+      path: /home/yf/github/my_board/components/espressif__esp_lvgl_port
       type: local
     version: 2.4.2
   idf:
@@ -65,6 +65,6 @@ direct_dependencies:
 - espressif/esp_lcd_touch_gt911
 - espressif/esp_lvgl_port
 - idf
-manifest_hash: 0b8e091921f3f19fac8c01432a7ee01391fb69817ba10e551a5dadfd1bf7bd2b
+manifest_hash: 87d9600ccba94e0e72756eef54f76f593e9d942882bce2807b1acb751fa6bb73
 target: esp32s3
 version: 2.0.0

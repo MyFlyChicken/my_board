@@ -100,7 +100,6 @@ static esp_err_t app_iic_init(void)
 static esp_err_t app_tca9554_init(void)
 {
     esp_err_t ret;
-    size_t i;
 
     ret = esp_io_expander_new_i2c_tca9554(i2c0_handle, ESP_IO_EXPANDER_I2C_TCA9554_ADDRESS_000, &io_expander);
     TEST_ASSERT_EQUAL_MESSAGE(ESP_OK, ret, "TCA9554 create returned error");
@@ -132,8 +131,8 @@ static esp_err_t app_lcd_init(void)
     esp_err_t ret = ESP_OK;
 
     /* LCD backlight */
-    gpio_config_t bk_gpio_config = { .mode = GPIO_MODE_OUTPUT, .pin_bit_mask = 1ULL << BOARD_LCD_GPIO_BL };
-    ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
+    // gpio_config_t bk_gpio_config = { .mode = GPIO_MODE_OUTPUT, .pin_bit_mask = 1ULL << BOARD_LCD_GPIO_BL };
+    // ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
 
     /* LCD initialization */
     ESP_LOGD(TAG, "Initialize SPI bus");
@@ -215,9 +214,11 @@ static esp_err_t app_touch_init(void)
             .mirror_y = 0,
         },
     };
+
     esp_lcd_panel_io_handle_t tp_io_handle = NULL;
     const esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
-    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c((esp_lcd_i2c_bus_handle_t)i2c0_handle, &tp_io_config, &tp_io_handle), TAG, "");
+    ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c0_handle, &tp_io_config, &tp_io_handle), TAG, "");
+
     return esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &touch_handle);
 }
 
