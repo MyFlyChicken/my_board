@@ -23,8 +23,8 @@
 #include "esp_lcd_touch_gt911.h"
 
 /* LCD size */
-#define BOARD_LCD_H_RES (320)
-#define BOARD_LCD_V_RES (240)
+#define BOARD_LCD_H_RES (240)
+#define BOARD_LCD_V_RES (320)
 
 /* LCD settings */
 #define BOARD_LCD_SPI_NUM          (SPI3_HOST)
@@ -163,6 +163,7 @@ static esp_err_t app_lcd_init(void)
         .reset_gpio_num = BOARD_LCD_GPIO_RST,
         .color_space = BOARD_LCD_COLOR_SPACE,
         .bits_per_pixel = BOARD_LCD_BITS_PER_PIXEL,
+        .rgb_ele_order = 1,
     };
     ESP_GOTO_ON_ERROR(esp_lcd_new_panel_st7789(lcd_io, &panel_config, &lcd_panel), err, TAG, "New panel failed");
 
@@ -172,6 +173,8 @@ static esp_err_t app_lcd_init(void)
     esp_io_expander_set_level(io_expander, BOARD_TOUCH_TCA9554_GPIO_INT, 0);
     vTaskDelay(pdMS_TO_TICKS(10));
     esp_io_expander_set_level(io_expander, BOARD_TOUCH_TCA9554_GPIO_INT, 1);
+    vTaskDelay(pdMS_TO_TICKS(6));
+    esp_io_expander_set_level(io_expander, BOARD_LCD_TCA9554_GPIO_RST, 1);
     vTaskDelay(pdMS_TO_TICKS(6));
     ret = esp_io_expander_set_dir(io_expander, BOARD_TOUCH_TCA9554_GPIO_INT, IO_EXPANDER_INPUT);
     TEST_ASSERT_EQUAL_MESSAGE(ESP_OK, ret, "TCA9554 set touch pin to input is error");
@@ -203,7 +206,7 @@ static esp_err_t app_touch_init(void)
         .x_max = BOARD_LCD_H_RES,
         .y_max = BOARD_LCD_V_RES,
         .rst_gpio_num = GPIO_NUM_NC, // Shared with LCD reset
-        .int_gpio_num = BOARD_TOUCH_GPIO_INT,
+        .int_gpio_num = GPIO_NUM_NC, // Shared with LCD reset
         .levels = {
             .reset = 0,
             .interrupt = 0,
@@ -211,12 +214,17 @@ static esp_err_t app_touch_init(void)
         .flags = {
             .swap_xy = 0,
             .mirror_x = 1,
-            .mirror_y = 0,
+            .mirror_y = 1,
         },
     };
 
     esp_lcd_panel_io_handle_t tp_io_handle = NULL;
-    const esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+    esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+    if (ESP_OK == i2c_master_probe(i2c0_handle, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP, -1)) {
+        ESP_LOGI(TAG, "Have probe ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP");
+        tp_io_config.dev_addr = ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP;
+    }
+    tp_io_config.scl_speed_hz = 400000;
     ESP_RETURN_ON_ERROR(esp_lcd_new_panel_io_i2c(i2c0_handle, &tp_io_config, &tp_io_handle), TAG, "");
 
     return esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &touch_handle);
