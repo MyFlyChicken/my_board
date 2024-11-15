@@ -161,9 +161,9 @@ static esp_err_t app_lcd_init(void)
     ESP_LOGD(TAG, "Install LCD driver");
     const esp_lcd_panel_dev_config_t panel_config = {
         .reset_gpio_num = BOARD_LCD_GPIO_RST,
-        .color_space = BOARD_LCD_COLOR_SPACE,
         .bits_per_pixel = BOARD_LCD_BITS_PER_PIXEL,
-        .rgb_ele_order = 1,
+        .data_endian = LCD_RGB_DATA_ENDIAN_LITTLE,
+        .rgb_ele_order = 0,
     };
     ESP_GOTO_ON_ERROR(esp_lcd_new_panel_st7789(lcd_io, &panel_config, &lcd_panel), err, TAG, "New panel failed");
 
@@ -262,7 +262,7 @@ static esp_err_t app_lvgl_init(void)
                                                .flags = {
                                                    .buff_dma = true,
 #if LVGL_VERSION_MAJOR >= 9
-                                                   .swap_bytes = true,
+                                                   .swap_bytes = false,
 #endif
                                                } };
     lvgl_disp = lvgl_port_add_disp(&disp_cfg);
